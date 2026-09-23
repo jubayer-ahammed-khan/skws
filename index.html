@@ -489,7 +489,7 @@
 
                             <div class="form-group">
                                 <label data-bn="বিবরণ" data-en="Description">বিবরণ</label>
-                                <textarea id="txnDescription" required></textarea>
+                                <textarea id="txnDescription"></textarea>
                             </div>
 
                             <div class="form-group">
@@ -857,7 +857,10 @@
                     <td>${txn.category}</td>
                     <td>${txn.description}</td>
                     <td style="font-weight: 600; color: ${txn.type === 'income' ? 'var(--success)' : 'var(--danger)'};">${(txn.type === 'income' ? '+' : '-')} ${txn.amount.toLocaleString('bn-BD')} ৳</td>
-                    <td>
+                    <td style="display: flex; gap: 0.5rem;">
+                        <button type="button" class="btn btn-sm btn-secondary" onclick="editTransaction(${txn.id})">
+                            ${appData.language === 'bn' ? '✏️ সম্পাদনা' : '✏️ Edit'}
+                        </button>
                         <button type="button" class="btn btn-sm btn-danger" onclick="deleteTransaction(${txn.id})">
                             ${appData.language === 'bn' ? '🗑️ মুছুন' : '🗑️ Delete'}
                         </button>
@@ -865,13 +868,51 @@
                 `;
             });
         }
-
         function deleteTransaction(id) {
             if (confirm(appData.language === 'bn' ? 'আপনি কি নিশ্চিত?' : 'Are you sure?')) {
                 appData.transactions = appData.transactions.filter(t => t.id !== id);
                 localStorage.setItem('skws_transactions', JSON.stringify(appData.transactions));
                 loadTransactionsList();
             }
+        }
+
+        function editTransaction(id) {
+            // Find the transaction
+            const txn = appData.transactions.find(t => t.id === id);
+            if (!txn) return;
+
+            // Populate the form with the old data
+            document.getElementById('txnDate').value = txn.date;
+            document.getElementById('txnType').value = txn.type;
+            
+            updateCategories(); 
+            document.getElementById('txnCategory').value = txn.category;
+            checkMemberFeeCategory(); 
+
+            // Clean up description if it was a member fee
+            let rawDescription = txn.description;
+            if (txn.category === 'সদস্য ফি' || txn.category === 'Member Fee') {
+                const match = rawDescription.match(/\(ID: (\d+)\)$/);
+                if (match) {
+                    const mId = parseInt(match[1]);
+                    const member = appData.members.find(m => m.id === mId);
+                    if (member) {
+                        document.getElementById('txnMemberSelect').value = `${member.id} - ${member.name} (${member.designation})`;
+                        rawDescription = rawDescription.replace(/ \s*\(ID: \d+\)$/, '');
+                    }
+                }
+            }
+
+            document.getElementById('txnDescription').value = rawDescription;
+            document.getElementById('txnAmount').value = txn.amount;
+
+            // Remove the old entry so it can be re-saved
+            appData.transactions = appData.transactions.filter(t => t.id !== id);
+            localStorage.setItem('skws_transactions', JSON.stringify(appData.transactions));
+            loadTransactionsList();
+
+            // Scroll back up to the form
+            document.getElementById('txnDate').scrollIntoView({ behavior: 'smooth' });
         }
 
         // ========== MEMBERS ==========
