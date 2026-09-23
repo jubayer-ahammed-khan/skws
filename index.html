@@ -101,6 +101,7 @@
             border: 1px solid rgba(255, 255, 255, 0.3);
             box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.1);
             flex-shrink: 0;
+            overflow: hidden;
         }
 
         .header-content h1 {
@@ -251,6 +252,7 @@
             background: linear-gradient(135deg, var(--primary), var(--accent));
             display: flex; align-items: center; justify-content: center;
             font-size: 2.5rem; color: white; box-shadow: var(--shadow-glow);
+            overflow: hidden;
         }
 
         .login-box h2 { text-align: center; font-size: 1.875rem; font-weight: 700; margin-bottom: 0.5rem; }
@@ -388,19 +390,59 @@
             .fee-grid { grid-template-columns: repeat(3, 1fr); }
         }
         
-        /* Spinner for Loading State */
-        .loader {
-            border: 3px solid rgba(79, 70, 229, 0.2);
-            border-top: 3px solid var(--primary);
-            border-radius: 50%;
-            width: 24px; height: 24px;
-            animation: spin 1s linear infinite;
-            display: inline-block;
+        /* ================= NEW: Toast Notifications & Loaders ================= */
+        .toast-container {
+            position: fixed; top: 1.5rem; right: 1.5rem; z-index: 99999;
+            display: flex; flex-direction: column; gap: 0.75rem; pointer-events: none;
+        }
+
+        .toast {
+            background: var(--surface); backdrop-filter: blur(16px);
+            border-left: 4px solid var(--primary);
+            padding: 1rem 1.5rem; border-radius: var(--radius-md);
+            box-shadow: var(--shadow-lg); color: var(--text);
+            font-weight: 600; font-size: 0.95rem;
+            animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1), fadeOut 0.3s ease 2.7s forwards;
+            display: flex; align-items: center; gap: 0.75rem;
+            pointer-events: all;
+        }
+        .toast.success { border-left-color: var(--success); }
+        .toast.error { border-left-color: var(--danger); }
+        
+        @keyframes slideInRight {
+            from { transform: translateX(120%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes fadeOut {
+            from { opacity: 1; transform: translateY(0); }
+            to { opacity: 0; transform: translateY(-10px); }
+        }
+
+        .loading-overlay {
+            position: fixed; inset: 0; background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(6px); z-index: 100000;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            color: white; font-weight: 600; font-size: 1.1rem; opacity: 0; pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .loading-overlay.active { opacity: 1; pointer-events: all; }
+        
+        .spinner-large {
+            border: 4px solid rgba(255, 255, 255, 0.2); border-top: 4px solid var(--accent);
+            border-radius: 50%; width: 56px; height: 56px;
+            animation: spin 1s cubic-bezier(0.4, 0, 0.2, 1) infinite; margin-bottom: 1.5rem;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
+    <!-- NEW: Global Toast Container & Loading Screen -->
+    <div id="toastContainer" class="toast-container"></div>
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="spinner-large"></div>
+        <div id="loadingText">দয়া করে অপেক্ষা করুন...</div>
+    </div>
+
     <div class="lang-toggle">
         <button class="lang-btn active" onclick="setLanguage('bn')">বাংলা</button>
         <button class="lang-btn" onclick="setLanguage('en')">English</button>
@@ -409,7 +451,7 @@
     <!-- Login Screen -->
     <div id="loginScreen" class="login-container">
         <div class="login-box">
-            <div class="login-logo"><img src="logo.png" alt="Logo" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;"></div>
+            <div class="login-logo"><img src="logo.png" alt="Logo" style="width: 100%; height: 100%; object-fit: cover;"></div>
             <h2 data-bn="আর্থিক ড্যাশবোর্ড" data-en="Finance Dashboard">আর্থিক ড্যাশবোর্ড</h2>
             <p class="subtitle" data-bn="সত্যের কাফেলা ওয়েলফেয়ার সোসাইটি" data-en="Satyér Kafela Welfare Society">সত্যের কাফেলা ওয়েলফেয়ার সোসাইটি</p>
             
@@ -439,7 +481,7 @@
     <div id="dashboard" class="hidden">
         <div class="container">
             <div class="header">
-                <div class="header-logo"><img src="logo.png" alt="Logo" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;"></div>
+                <div class="header-logo"><img src="logo.png" alt="Logo" style="width: 100%; height: 100%; object-fit: cover;"></div>
                 <div class="header-content">
                     <h1 data-bn="সত্যের কাফেলা" data-en="Satyér Kafela">সত্যের কাফেলা</h1>
                     <p class="subtitle" data-bn="ওয়েলফেয়ার সোসাইটি - আর্থিক ব্যবস্থাপনা" data-en="Welfare Society - Financial Management">ওয়েলফেয়ার সোসাইটি - আর্থিক ব্যবস্থাপনা</p>
@@ -614,31 +656,45 @@
         </div>
     </div>
 
-<script>
+    <script>
         // ========== GOOGLE SHEETS CLOUD CONFIGURATION ==========
         const GOOGLE_SHEETS_CONFIG = {
             isActive: true, 
             sheetId: '1zGNsq0OfflMlxQNfKlWPlUNsbpIYdy_50QtiZI9gl3A', 
             apiKey: 'AIzaSyAZHdDul8gJVGAQ4M3W5YJSBzKYQyREP4s',
             webAppUrl: 'https://script.google.com/macros/s/AKfycbzinZ7gIdHdF1_GWLgM1kr80uLkthmwiENgr_GpDFgAwEuJ1IGAVqHHcOB_ds0fdTk0qQ/exec',
-            ranges: {
-                admins: 'Admin!A2:C',
-                members: 'Members!A2:D'
-            }
+            ranges: { admins: 'Admin!A2:C', members: 'Members!A2:D' }
         };
 
-        // ========== DATA STRUCTURE ==========
         const appData = {
-            language: 'bn',
-            currentUser: null,
-            transactions: [], // Now loaded directly from Cloud
-            members: [],      // Now loaded directly from Cloud
+            language: 'bn', currentUser: null, transactions: [], members: [], admins: [],
             incomeCategories: ['সদস্য ফি', 'দান', 'কর্পোরেট স্পন্সরশিপ', 'অন্যান্য'],
             incomeCategoriesEn: ['Member Fee', 'Donation', 'Corporate Sponsorship', 'Others'],
             expenseCategories: ['অফিস ভাড়া', 'বিদ্যুৎ বিল', 'ইন্টারনেট বিল', 'অফিস খরচ', 'প্রোগ্রাম খরচ', 'অন্যান্য'],
-            expenseCategoriesEn: ['Office Rent', 'Electricity Bill', 'WiFi Bill', 'Office Cost', 'Program Cost', 'Others'],
-            admins: []
+            expenseCategoriesEn: ['Office Rent', 'Electricity Bill', 'WiFi Bill', 'Office Cost', 'Program Cost', 'Others']
         };
+
+        // ========== NEW: UI NOTIFICATIONS & LOADERS ==========
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            const icon = type === 'success' ? '✅' : '⚠️';
+            toast.innerHTML = `<span style="font-size: 1.25rem;">${icon}</span> <span>${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => { toast.remove(); }, 3000);
+        }
+
+        function showLoading(msgBn, msgEn) {
+            const overlay = document.getElementById('loadingOverlay');
+            const text = document.getElementById('loadingText');
+            text.textContent = appData.language === 'bn' ? msgBn : msgEn;
+            overlay.classList.add('active');
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingOverlay').classList.remove('active');
+        }
 
         // ========== LANGUAGE SYSTEM ==========
         function setLanguage(lang) {
@@ -647,8 +703,7 @@
             event.target.classList.add('active');
             updateAllText();
             if (appData.currentUser && appData.currentUser.role === 'cashier') {
-                updateCategories();
-                loadTransactionsList();
+                updateCategories(); loadTransactionsList();
             }
         }
 
@@ -665,12 +720,13 @@
             if(txnMemberInput) txnMemberInput.placeholder = appData.language === 'bn' ? 'নাম দিয়ে খুঁজুন...' : 'Search by name...';
         }
 
-        // ========== GOOGLE SHEETS API FETCH (READ) ==========
+        // ========== GOOGLE SHEETS API FETCH ==========
         async function fetchGoogleSheetsData() {
             if (!GOOGLE_SHEETS_CONFIG.isActive) return true; 
             
+            showLoading('ডেটাবেস সংযুক্ত করা হচ্ছে...', 'Connecting to database...');
+            
             try {
-                // 1. Fetch Admins and Members from Sheets API
                 const baseUrl = `https://sheets.googleapis.com/v4/spreadsheets/${GOOGLE_SHEETS_CONFIG.sheetId}/values:batchGet?key=${GOOGLE_SHEETS_CONFIG.apiKey}`;
                 const ranges = `ranges=${GOOGLE_SHEETS_CONFIG.ranges.admins}&ranges=${GOOGLE_SHEETS_CONFIG.ranges.members}`;
                 
@@ -681,30 +737,24 @@
 
                 const adminRows = data.valueRanges[0].values || [];
                 appData.admins = adminRows.map(row => ({
-                    username: row[0],
-                    password: row[1],
-                    role: row[2] || 'cashier'
+                    username: row[0], password: row[1], role: row[2] || 'cashier'
                 }));
 
                 const memberRows = data.valueRanges[1].values || [];
                 appData.members = memberRows.map(row => ({
-                    id: parseInt(row[0]),
-                    name: row[1],
-                    designation: row[2],
-                    monthlyFee: parseFloat(row[3])
+                    id: parseInt(row[0]), name: row[1], designation: row[2], monthlyFee: parseFloat(row[3])
                 }));
 
-                // 2. Fetch Transactions from Web App
                 const txnResponse = await fetch(GOOGLE_SHEETS_CONFIG.webAppUrl);
                 const txnData = await txnResponse.json();
                 appData.transactions = txnData || [];
 
+                hideLoading();
                 return true;
             } catch (error) {
                 console.error("Google Sheets Error:", error);
-                const errorDiv = document.getElementById('loginErrorMsg');
-                errorDiv.textContent = appData.language === 'bn' ? 'ডেটাবেস সংযোগ ব্যর্থ হয়েছে' : 'Database connection failed';
-                errorDiv.classList.remove('hidden');
+                hideLoading();
+                showToast(appData.language === 'bn' ? 'ডেটাবেস সংযোগ ব্যর্থ হয়েছে' : 'Database connection failed', 'error');
                 return false;
             }
         }
@@ -712,20 +762,7 @@
         // ========== LOGIN & AUTH ==========
         async function handleLogin(e) {
             e.preventDefault();
-            
-            const btn = document.getElementById('loginBtn');
-            const btnText = document.getElementById('loginBtnText');
-            const errorDiv = document.getElementById('loginErrorMsg');
-            
-            btnText.innerHTML = '<div class="loader"></div>';
-            btn.disabled = true;
-            errorDiv.classList.add('hidden');
-
             const sheetsSuccess = await fetchGoogleSheetsData();
-
-            btnText.innerHTML = appData.language === 'bn' ? 'লগইন' : 'Login';
-            btn.disabled = false;
-
             if (!sheetsSuccess && GOOGLE_SHEETS_CONFIG.isActive) return;
 
             const username = document.getElementById('username').value;
@@ -735,12 +772,11 @@
             if (admin) {
                 appData.currentUser = { username, role: admin.role };
                 localStorage.setItem('skws_currentUser', JSON.stringify(appData.currentUser));
+                showToast(appData.language === 'bn' ? 'সফলভাবে লগইন হয়েছে' : 'Successfully logged in');
                 showDashboard();
             } else {
-                errorDiv.textContent = appData.language === 'bn' ? 'ভুল ব্যবহারকারী নাম বা পাসওয়ার্ড' : 'Invalid username or password';
-                errorDiv.classList.remove('hidden');
+                showToast(appData.language === 'bn' ? 'ভুল ব্যবহারকারী নাম বা পাসওয়ার্ড' : 'Invalid username or password', 'error');
             }
-
             document.getElementById('password').value = '';
         }
 
@@ -775,7 +811,6 @@
                 loadMembersList(); 
                 setDateToToday();
                 updateCategories();
-                
                 document.getElementById('txnCategory').addEventListener('change', checkMemberFeeCategory);
             }
         }
@@ -814,7 +849,7 @@
             if (category === 'সদস্য ফি' || category === 'Member Fee') {
                 const memberVal = document.getElementById('txnMemberSelect').value;
                 if (!memberVal) {
-                    alert(appData.language === 'bn' ? 'দয়া করে একজন সদস্য নির্বাচন করুন' : 'Please select a member');
+                    showToast(appData.language === 'bn' ? 'দয়া করে একজন সদস্য নির্বাচন করুন' : 'Please select a member', 'error');
                     return;
                 }
                 const parsedId = memberVal.split(' - ')[0];
@@ -822,7 +857,7 @@
             }
 
             const txn = {
-                id: Date.now().toString(), // Stringified for Google Sheets
+                id: Date.now().toString(), 
                 date: document.getElementById('txnDate').value,
                 type: document.getElementById('txnType').value,
                 category: category,
@@ -831,22 +866,16 @@
                 enteredBy: appData.currentUser.username
             };
 
-            // Loading state
-            const btn = e.target.querySelector('button[type="submit"]');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<div class="loader"></div>';
-            btn.disabled = true;
+            showLoading('ডেটা সংরক্ষণ করা হচ্ছে...', 'Saving data...');
 
             try {
-                // Save to Google Sheets Web App
                 await fetch(GOOGLE_SHEETS_CONFIG.webAppUrl, {
-                    method: 'POST',
-                    body: JSON.stringify(txn)
+                    method: 'POST', body: JSON.stringify(txn)
                 });
 
-                // Update UI instantly
                 appData.transactions.push(txn);
-                alert(appData.language === 'bn' ? '✓ লেনদেন যোগ হয়েছে' : '✓ Transaction added');
+                hideLoading();
+                showToast(appData.language === 'bn' ? 'লেনদেন সফলভাবে যোগ করা হয়েছে' : 'Transaction successfully added', 'success');
                 
                 e.target.reset();
                 setDateToToday();
@@ -854,10 +883,8 @@
                 loadTransactionsList();
                 
             } catch (error) {
-                alert(appData.language === 'bn' ? 'ত্রুটি হয়েছে, আবার চেষ্টা করুন' : 'Error saving transaction');
-            } finally {
-                btn.innerHTML = originalText;
-                btn.disabled = false;
+                hideLoading();
+                showToast(appData.language === 'bn' ? 'ত্রুটি হয়েছে, আবার চেষ্টা করুন' : 'Error saving transaction', 'error');
             }
         }
 
@@ -893,21 +920,27 @@
         async function deleteTransaction(id, skipConfirm = false) {
             if (skipConfirm || confirm(appData.language === 'bn' ? 'আপনি কি নিশ্চিত?' : 'Are you sure?')) {
                 
-                // Remove instantly from UI for speed
+                if(!skipConfirm) showLoading('মুছে ফেলা হচ্ছে...', 'Deleting...');
+                
                 appData.transactions = appData.transactions.filter(t => t.id.toString() !== id.toString());
                 loadTransactionsList();
 
                 const activeSearch = document.getElementById('memberSearch');
                 if(activeSearch && activeSearch.value) handleMemberSelect(activeSearch.value);
 
-                // Send delete request to Google Sheets
                 try {
                     await fetch(GOOGLE_SHEETS_CONFIG.webAppUrl, {
-                        method: 'POST',
-                        body: JSON.stringify({ action: "delete", id: id })
+                        method: 'POST', body: JSON.stringify({ action: "delete", id: id })
                     });
+                    if(!skipConfirm) {
+                        hideLoading();
+                        showToast(appData.language === 'bn' ? 'সফলভাবে মুছে ফেলা হয়েছে' : 'Successfully deleted');
+                    }
                 } catch (error) {
-                    console.error('Delete error', error);
+                    if(!skipConfirm) {
+                        hideLoading();
+                        showToast('Error deleting item', 'error');
+                    }
                 }
             }
         }
@@ -939,7 +972,6 @@
             document.getElementById('txnDescription').value = rawDescription;
             document.getElementById('txnAmount').value = txn.amount;
 
-            // Delete the old cloud record silently (skipConfirm = true)
             deleteTransaction(id, true); 
             document.getElementById('txnDate').scrollIntoView({ behavior: 'smooth' });
         }
@@ -1024,7 +1056,7 @@
             );
 
             if (exists) {
-                alert(appData.language === 'bn' ? 'ইতিমধ্যে রেকর্ড করা হয়েছে' : 'Already recorded');
+                showToast(appData.language === 'bn' ? 'ইতিমধ্যে রেকর্ড করা হয়েছে' : 'Already recorded', 'error');
                 return;
             }
 
@@ -1038,19 +1070,21 @@
                 enteredBy: appData.currentUser.username
             };
 
-            // Optimistic UI update
+            showLoading('ডেটা সংরক্ষণ করা হচ্ছে...', 'Saving data...');
+
             appData.transactions.push(txn);
             loadMemberFees(memberId);
             loadTransactionsList();
 
             try {
-                // Save to cloud silently
                 await fetch(GOOGLE_SHEETS_CONFIG.webAppUrl, {
-                    method: 'POST',
-                    body: JSON.stringify(txn)
+                    method: 'POST', body: JSON.stringify(txn)
                 });
+                hideLoading();
+                showToast(appData.language === 'bn' ? 'সদস্য ফি সফলভাবে যোগ করা হয়েছে' : 'Member fee added successfully');
             } catch (error) {
-                console.error("Error saving fee to cloud", error);
+                hideLoading();
+                showToast('Error saving to cloud', 'error');
             }
         }
 
@@ -1169,12 +1203,13 @@
             if (stored) {
                 appData.currentUser = JSON.parse(stored);
                 if(appData.currentUser.role === 'visitor') {
-                    enterAsVisitor(); // Automatically triggers cloud fetch
+                    fetchGoogleSheetsData().then(() => showDashboard());
                 } else {
-                    showDashboard();  // Triggered by existing session
+                    fetchGoogleSheetsData().then(() => showDashboard());
                 }
+            } else {
+                updateAllText();
             }
-            updateAllText();
         });
     </script>
 </body>
