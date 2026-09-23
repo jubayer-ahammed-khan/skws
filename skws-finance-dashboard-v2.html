@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="bn-en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0, viewport-fit=cover">
+    <meta name="description" content="Satyér Kafela Welfare Society - Financial Management Dashboard">
+    <title>SKWS Finance Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4f46e5; 
+            --primary-light: #6366f1;
+            --primary-dark: #3730a3;
+            --accent: #0ea5e9;
+            --accent-dark: #0284c7;
+            
+            --success: #10b981;
+            --success-bg: #d1fae5;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --danger-bg: #fee2e2;
+            --info: #3b82f6;
+
+            --bg: #f8fafc;
+            --surface: rgba(255, 255, 255, 0.85);
+            --surface-solid: #ffffff;
+            --text: #0f172a;
+            --text-secondary: #64748b;
+            --border: #e2e8f0;
+            --border-light: rgba(226, 232, 240, 0.5);
+
+            --shadow-sm: 0 2px 4px rgba(15, 23, 42, 0.04);
+            --shadow: 0 8px 16px -4px rgba(15, 23, 42, 0.08), 0 4px 8px -4px rgba(15, 23, 42, 0.04);
+            --shadow-lg: 0 20px 24px -4px rgba(15, 23, 42, 0.12), 0 8px 10px -6px rgba(15, 23, 42, 0.08);
+            --shadow-glow: 0 0 24px rgba(79, 70, 229, 0.2);
+            
+            --radius-sm: 10px;
+            --radius-md: 16px;
+            --radius-lg: 24px;
+            --radius-full: 9999px;
+            
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0b0f19;
+                --surface: rgba(15, 23, 42, 0.75);
+                --surface-solid: #0f172a;
+                --text: #f8fafc;
+                --text-secondary: #94a3b8;
+                --border: #1e293b;
+                --border-light: rgba(30, 41, 59, 0.5);
+                --success-bg: rgba(16, 185, 129, 0.15);
+                --danger-bg: rgba(239, 68, 68, 0.15);
+                --shadow: 0 8px 16px -4px rgba(0, 0, 0, 0.4);
+                --shadow-lg: 0 20px 24px -4px rgba(0, 0, 0, 0.5);
+            }
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        html, body {
+            height: 100%;
+            font-family: 'Plus Jakarta Sans', 'Noto Sans Bengali', sans-serif;
+            background: var(--bg);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(79, 70, 229, 0.08) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(14, 165, 233, 0.08) 0px, transparent 50%);
+            background-attachment: fixed;
+            color: var(--text);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 1.5rem; }
+
+        .header {
+            background: linear-gradient(135deg, rgba(79, 70, 229, 0.95), rgba(55, 48, 163, 0.95));
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            color: white;
+            padding: 2rem;
+            border-radius: var(--radius-lg);
+            margin-bottom: 2.5rem;
+            box-shadow: var(--shadow-lg), var(--shadow-glow);
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            gap: 1.5rem;
+            align-items: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .header-logo {
+            width: 72px; height: 72px;
+            border-radius: var(--radius-full);
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(8px);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 2.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.1);
+            flex-shrink: 0;
+        }
+
+        .header-content h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.25rem;
+            background: linear-gradient(to right, #fff, #e0e7ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header-content .subtitle { font-size: 1rem; color: #e0e7ff; font-weight: 500; }
+        .header-actions { display: flex; flex-direction: column; gap: 1rem; align-items: flex-end; }
+
+        .user-badge {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            padding: 0.5rem 1.25rem;
+            border-radius: var(--radius-full);
+            font-size: 0.875rem;
+            font-weight: 600;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(4px);
+        }
+
+        .card {
+            background: var(--surface);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        .card:hover { box-shadow: var(--shadow-lg); transform: translateY(-2px); }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 2rem;
+            display: flex; align-items: center; gap: 0.75rem;
+        }
+
+        .card-title::before {
+            content: ''; width: 4px; height: 20px;
+            background: linear-gradient(180deg, var(--primary), var(--accent));
+            border-radius: var(--radius-full);
+        }
+
+        .form-group { margin-bottom: 1.5rem; }
+
+        label {
+            display: block; font-size: 0.875rem; margin-bottom: 0.5rem;
+            font-weight: 600; color: var(--text-secondary);
+        }
+
+        input, select, textarea {
+            width: 100%; padding: 0.875rem 1rem;
+            border: 2px solid var(--border);
+            border-radius: var(--radius-md);
+            font-size: 16px; font-family: inherit;
+            background: var(--surface-solid);
+            color: var(--text);
+            transition: var(--transition);
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none; border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.15);
+            transform: translateY(-1px);
+        }
+
+        textarea { resize: vertical; min-height: 100px; }
+
+        .btn {
+            padding: 1rem 1.75rem; 
+            border: none; border-radius: var(--radius-md);
+            font-size: 1rem; font-weight: 600;
+            cursor: pointer; transition: var(--transition);
+            display: inline-flex; align-items: center; justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(79, 70, 229, 0.4);
+            background: linear-gradient(135deg, var(--primary-light), var(--primary));
+        }
+
+        .btn-secondary {
+            background: var(--surface-solid);
+            color: var(--text);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-secondary:hover { border-color: var(--primary); color: var(--primary); transform: translateY(-2px); }
+
+        .btn-danger {
+            background: var(--danger-bg); color: var(--danger);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            padding: 0.5rem 1rem;
+        }
+
+        .btn-danger:hover { background: var(--danger); color: white; }
+        .btn-sm { padding: 0.5rem 1rem; font-size: 0.875rem; border-radius: var(--radius-sm); }
+        .btn-full { width: 100%; }
+
+        .login-container {
+            display: flex; align-items: center; justify-content: center;
+            min-height: 100vh; padding: 1rem;
+            background: linear-gradient(135deg, var(--bg) 0%, #e0e7ff 100%);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .login-container { background: linear-gradient(135deg, var(--bg) 0%, #1e1b4b 100%); }
+        }
+
+        .login-box {
+            background: var(--surface);
+            backdrop-filter: blur(24px);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+            padding: 3rem;
+            box-shadow: var(--shadow-lg);
+            width: 100%; max-width: 440px;
+            animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .login-logo {
+            width: 88px; height: 88px; margin: 0 auto 2rem;
+            border-radius: var(--radius-full);
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            display: flex; align-items: center; justify-content: center;
+            font-size: 2.5rem; color: white; box-shadow: var(--shadow-glow);
+        }
+
+        .login-box h2 { text-align: center; font-size: 1.875rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .login-box .subtitle { text-align: center; color: var(--text-secondary); margin-bottom: 2.5rem; }
+
+        .tabs {
+            display: flex; gap: 1rem; margin-bottom: 2rem;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 0; overflow-x: auto; 
+            scrollbar-width: none; -webkit-overflow-scrolling: touch;
+            white-space: nowrap;
+        }
+
+        .tabs::-webkit-scrollbar { display: none; }
+
+        .tab-btn {
+            padding: 1rem 1.5rem; border: none; background: none;
+            color: var(--text-secondary); font-size: 1rem; font-weight: 600;
+            cursor: pointer; position: relative; transition: var(--transition);
+        }
+
+        .tab-btn::after {
+            content: ''; position: absolute; bottom: -2px; left: 0; right: 0;
+            height: 3px; background: var(--primary); border-radius: 3px 3px 0 0;
+            transform: scaleX(0); transition: transform 0.3s ease;
+        }
+
+        .tab-btn.active { color: var(--primary); }
+        .tab-btn.active::after { transform: scaleX(1); }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.4s ease; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .table-wrapper {
+            overflow-x: auto; border-radius: var(--radius-md);
+            border: 1px solid var(--border); background: var(--surface-solid);
+            -webkit-overflow-scrolling: touch;
+        }
+
+        table { width: 100%; border-collapse: collapse; font-size: 0.95rem; white-space: nowrap; }
+        
+        th {
+            background: var(--bg); color: var(--text-secondary);
+            padding: 1.25rem 1rem; text-align: left; font-weight: 600;
+            text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em;
+            border-bottom: 1px solid var(--border);
+        }
+
+        td { padding: 1.25rem 1rem; border-bottom: 1px solid var(--border); color: var(--text); }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: var(--bg); }
+
+        .stats-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem; margin-bottom: 2.5rem;
+        }
+
+        .stat-card {
+            background: var(--surface-solid);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 2rem; box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+            display: flex; flex-direction: column; gap: 0.5rem;
+        }
+
+        .stat-card:hover { transform: translateY(-4px); box-shadow: var(--shadow); }
+        .stat-value { font-size: 2.25rem; font-weight: 700; letter-spacing: -0.02em; }
+        .stat-label { font-size: 0.875rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase; }
+
+        .lang-toggle {
+            position: fixed; bottom: 2rem; right: 2rem;
+            display: flex; background: var(--surface-solid);
+            padding: 0.35rem; border-radius: var(--radius-full);
+            box-shadow: var(--shadow-lg); z-index: 100;
+            border: 1px solid var(--border);
+        }
+
+        .lang-btn {
+            padding: 0.5rem 1.25rem; border: none; border-radius: var(--radius-full);
+            background: transparent; color: var(--text-secondary);
+            cursor: pointer; font-weight: 600; transition: var(--transition);
+            font-size: 0.875rem;
+        }
+
+        .lang-btn.active { background: var(--text); color: var(--surface-solid); }
+
+        .fee-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 0.75rem; margin-top: 1.5rem;
+        }
+
+        .fee-month {
+            padding: 0.75rem; border-radius: var(--radius-sm);
+            text-align: center; border: 1px solid transparent;
+            cursor: pointer; transition: var(--transition);
+            font-weight: 600; font-size: 0.875rem; display: flex; flex-direction: column; gap: 0.25rem;
+        }
+
+        .fee-month:hover { transform: scale(1.05); }
+        .fee-month.paid { background: var(--success-bg); color: var(--success); border-color: rgba(16, 185, 129, 0.2); }
+        .fee-month.unpaid { background: var(--danger-bg); color: var(--danger); border-color: rgba(239, 68, 68, 0.2); }
+        .fee-month small { font-size: 0.7rem; opacity: 0.8; }
+
+        .footer {
+            margin-top: 4rem; padding: 3rem 0;
+            text-align: center; border-top: 1px solid var(--border);
+        }
+        .footer h3 { color: var(--text); font-size: 1.125rem; margin-bottom: 0.5rem; }
+        .footer p { color: var(--text-secondary); font-size: 0.875rem; }
+
+        .hidden { display: none !important; }
+
+        @media (max-width: 768px) {
+            .container { padding: 1rem; }
+            .header { grid-template-columns: 1fr; text-align: center; padding: 1.5rem; gap: 1rem; }
+            .header-logo { margin: 0 auto; width: 64px; height: 64px; font-size: 2rem; }
+            .header-content h1 { font-size: 1.5rem; }
+            .header-actions { align-items: center; flex-direction: row; justify-content: center; }
+            .card { padding: 1.25rem; }
+            .card-title { font-size: 1.15rem; }
+            .stats-grid { grid-template-columns: 1fr; }
+            .stat-value { font-size: 1.75rem; }
+            .fee-grid { grid-template-columns: repeat(4, 1fr); }
+            .lang-toggle { bottom: 1rem; right: 1rem; padding: 0.25rem; }
+            .login-box { padding: 1.5rem; border-radius: var(--radius-md); }
+        }
+
+        @media (max-width: 400px) {
+            .fee-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+        
+        /* Spinner for Loading State */
+        .loader {
+            border: 3px solid rgba(79, 70, 229, 0.2);
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            width: 24px; height: 24px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <div class="lang-toggle">
+        <button class="lang-btn active" onclick="setLanguage('bn')">বাংলা</button>
+        <button class="lang-btn" onclick="setLanguage('en')">English</button>
+    </div>
+
+    <!-- Login Screen -->
+    <div id="loginScreen" class="login-container">
+        <div class="login-box">
+            <div class="login-logo">🤝</div>
+            <h2 data-bn="আর্থিক ড্যাশবোর্ড" data-en="Finance Dashboard">আর্থিক ড্যাশবোর্ড</h2>
+            <p class="subtitle" data-bn="সত্যের কাফেলা ওয়েলফেয়ার সোসাইটি" data-en="Satyér Kafela Welfare Society">সত্যের কাফেলা ওয়েলফেয়ার সোসাইটি</p>
+            
+            <div id="loginErrorMsg" style="color: var(--danger); text-align: center; margin-bottom: 1rem; font-size: 0.875rem;" class="hidden"></div>
+
+            <form onsubmit="handleLogin(event)" style="margin-bottom: 2rem;">
+                <div class="form-group">
+                    <label data-bn="ব্যবহারকারী নাম" data-en="Username">ব্যবহারকারী নাম</label>
+                    <input type="text" id="username" required autocomplete="username">
+                </div>
+                <div class="form-group">
+                    <label data-bn="পাসওয়ার্ড" data-en="Password">পাসওয়ার্ড</label>
+                    <input type="password" id="password" required autocomplete="current-password">
+                </div>
+                <button type="submit" id="loginBtn" class="btn btn-primary btn-full">
+                    <span id="loginBtnText" data-bn="লগইন" data-en="Login">লগইন</span>
+                </button>
+            </form>
+
+            <div style="border-top: 1px solid var(--border); padding-top: 1.5rem;">
+                <button type="button" class="btn btn-secondary btn-full" onclick="enterAsVisitor()" data-bn="অতিথি হিসেবে প্রবেশ" data-en="Enter as Visitor">অতিথি হিসেবে প্রবেশ</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Dashboard -->
+    <div id="dashboard" class="hidden">
+        <div class="container">
+            <div class="header">
+                <div class="header-logo">🤝</div>
+                <div class="header-content">
+                    <h1 data-bn="সত্যের কাফেলা" data-en="Satyér Kafela">সত্যের কাফেলা</h1>
+                    <p class="subtitle" data-bn="ওয়েলফেয়ার সোসাইটি - আর্থিক ব্যবস্থাপনা" data-en="Welfare Society - Financial Management">ওয়েলফেয়ার সোসাইটি - আর্থিক ব্যবস্থাপনা</p>
+                </div>
+                <div class="header-actions">
+                    <div class="user-badge" id="userRole"></div>
+                    <button type="button" onclick="logout()" class="btn btn-secondary btn-sm" style="background: rgba(255,255,255,0.1); color: white; border-color: rgba(255,255,255,0.2);" data-bn="লগআউট" data-en="Logout">লগআউট</button>
+                </div>
+            </div>
+
+            <!-- Cashier Panel -->
+            <div id="cashierPanel" class="hidden">
+                <div class="tabs">
+                    <button class="tab-btn active" onclick="switchTab('transactions')" data-bn="লেনদেন" data-en="Transactions">লেনদেন</button>
+                    <button class="tab-btn" onclick="switchTab('members')" data-bn="সদস্য ফি" data-en="Member Fees">সদস্য ফি</button>
+                    <button class="tab-btn" onclick="switchTab('reports')" data-bn="প্রতিবেদন" data-en="Reports">প্রতিবেদন</button>
+                </div>
+
+                <!-- Transactions Tab -->
+                <div id="transactions" class="tab-content active">
+                    <div class="card">
+                        <div class="card-title" data-bn="নতুন লেনদেন যোগ করুন" data-en="Add New Transaction">নতুন লেনদেন যোগ করুন</div>
+                        <form onsubmit="handleAddTransaction(event)">
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                                <div class="form-group">
+                                    <label data-bn="তারিখ" data-en="Date">তারিখ</label>
+                                    <input type="date" id="txnDate" value="">
+                                </div>
+                                <div class="form-group">
+                                    <label data-bn="ধরন" data-en="Type">ধরন</label>
+                                    <select id="txnType" onchange="updateCategories()" required>
+                                        <option value="income" data-bn="আয়" data-en="Income">আয়</option>
+                                        <option value="expense" data-bn="ব্যয়" data-en="Expense">ব্যয়</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label data-bn="বিভাগ" data-en="Category">বিভাগ</label>
+                                    <select id="txnCategory" required></select>
+                                </div>
+                            </div>
+
+                            <div class="form-group hidden" id="txnMemberSelectGroup">
+                                <label data-bn="সদস্য নির্বাচন করুন" data-en="Select Member">সদস্য নির্বাচন করুন</label>
+                                <input type="text" id="txnMemberSelect" list="txnMemberDatalist" autocomplete="off" placeholder="Search by name...">
+                                <datalist id="txnMemberDatalist"></datalist>
+                            </div>
+
+                            <div class="form-group">
+                                <label data-bn="বিবরণ" data-en="Description">বিবরণ</label>
+                                <textarea id="txnDescription" required></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label data-bn="পরিমাণ (টাকা)" data-en="Amount (BDT)">পরিমাণ (টাকা)</label>
+                                <input type="number" id="txnAmount" step="0.01" required>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary btn-full" data-bn="যোগ করুন" data-en="Add">যোগ করুন</button>
+                        </form>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-title" data-bn="সম্প্রতি যোগ করা লেনদেন" data-en="Recent Transactions">সম্প্রতি যোগ করা লেনদেন</div>
+                        <div class="table-wrapper">
+                            <table id="transactionsList">
+                                <thead>
+                                    <tr>
+                                        <th data-bn="তারিখ" data-en="Date">তারিখ</th>
+                                        <th data-bn="ধরন" data-en="Type">ধরন</th>
+                                        <th data-bn="বিভাগ" data-en="Category">বিভাগ</th>
+                                        <th data-bn="বিবরণ" data-en="Description">বিবরণ</th>
+                                        <th data-bn="পরিমাণ" data-en="Amount">পরিমাণ</th>
+                                        <th data-bn="অ্যাকশন" data-en="Action">অ্যাকশন</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Member Fees Tab -->
+                <div id="members" class="tab-content">
+                    <div class="card">
+                        <div class="card-title" data-bn="সদস্য ফি রেকর্ড" data-en="Member Fees Record">সদস্য ফি রেকর্ড</div>
+                        
+                        <div class="form-group" style="margin-bottom: 2rem;">
+                            <label data-bn="সদস্য খুঁজুন বা নির্বাচন করুন" data-en="Search or Select Member">সদস্য খুঁজুন বা নির্বাচন করুন</label>
+                            <input type="text" id="memberSearch" list="memberDatalist" placeholder="Search by name..." oninput="handleMemberSelect(this.value)" autocomplete="off">
+                            <datalist id="memberDatalist"></datalist>
+                        </div>
+                        <div id="singleMemberView" class="hidden"></div>
+                    </div>
+                </div>
+
+                <!-- Reports Tab -->
+                <div id="reports" class="tab-content">
+                    <div class="card">
+                        <div class="card-title" data-bn="আর্থিক প্রতিবেদন" data-en="Financial Reports">আর্থিক প্রতিবেদন</div>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 2.5rem;">
+                            <div class="form-group">
+                                <label data-bn="বছর" data-en="Year">বছর</label>
+                                <input type="number" id="reportYear" value="2026" min="2020" max="2099">
+                            </div>
+                            <div class="form-group">
+                                <label data-bn="মাস" data-en="Month">মাস</label>
+                                <select id="reportMonth">
+                                    <option value="all" data-bn="সব মাস" data-en="All Months">সব মাস</option>
+                                    <option value="1" data-bn="জানুয়ারি" data-en="January">জানুয়ারি</option>
+                                    <option value="2" data-bn="ফেব্রুয়ারি" data-en="February">ফেব্রুয়ারি</option>
+                                    <option value="3" data-bn="মার্চ" data-en="March">মার্চ</option>
+                                    <option value="4" data-bn="এপ্রিল" data-en="April">এপ্রিল</option>
+                                    <option value="5" data-bn="মে" data-en="May">মে</option>
+                                    <option value="6" data-bn="জুন" data-en="June">জুন</option>
+                                    <option value="7" data-bn="জুলাই" data-en="July">জুলাই</option>
+                                    <option value="8" data-bn="আগস্ট" data-en="August">আগস্ট</option>
+                                    <option value="9" data-bn="সেপ্টেম্বর" data-en="September">সেপ্টেম্বর</option>
+                                    <option value="10" data-bn="অক্টোবর" data-en="October">অক্টোবর</option>
+                                    <option value="11" data-bn="নভেম্বর" data-en="November">নভেম্বর</option>
+                                    <option value="12" data-bn="ডিসেম্বর" data-en="December">ডিসেম্বর</option>
+                                </select>
+                            </div>
+                            <div style="display: flex; align-items: flex-end;">
+                                <button type="button" onclick="generateReport()" class="btn btn-primary btn-full" style="margin-bottom: 1.5rem;" data-bn="প্রতিবেদন তৈরি করুন" data-en="Generate Report">প্রতিবেদন তৈরি করুন</button>
+                            </div>
+                        </div>
+                        <div id="reportContent"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Visitor Panel -->
+            <div id="visitorPanel" class="hidden">
+                <div class="card">
+                    <div class="card-title" data-bn="আর্থিক প্রতিবেদন" data-en="Financial Reports">আর্থিক প্রতিবেদন</div>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 2.5rem;">
+                        <div class="form-group">
+                            <label data-bn="বছর" data-en="Year">বছর</label>
+                            <input type="number" id="visitorYear" value="2026" min="2020" max="2099">
+                        </div>
+                        <div class="form-group">
+                            <label data-bn="মাস" data-en="Month">মাস</label>
+                            <select id="visitorMonth">
+                                <option value="all" data-bn="সব মাস" data-en="All Months">সব মাস</option>
+                                <option value="1" data-bn="জানুয়ারি" data-en="January">জানুয়ারি</option>
+                                <option value="2" data-bn="ফেব্রুয়ারি" data-en="February">ফেব্রুয়ারি</option>
+                                <option value="3" data-bn="মার্চ" data-en="March">মার্চ</option>
+                                <option value="4" data-bn="এপ্রিল" data-en="April">এপ্রিল</option>
+                                <option value="5" data-bn="মে" data-en="May">মে</option>
+                                <option value="6" data-bn="জুন" data-en="June">জুন</option>
+                                <option value="7" data-bn="জুলাই" data-en="July">জুলাই</option>
+                                <option value="8" data-bn="আগস্ট" data-en="August">আগস্ট</option>
+                                <option value="9" data-bn="সেপ্টেম্বর" data-en="September">সেপ্টেম্বর</option>
+                                <option value="10" data-bn="অক্টোবর" data-en="October">অক্টোবর</option>
+                                <option value="11" data-bn="নভেম্বর" data-en="November">নভেম্বর</option>
+                                <option value="12" data-bn="ডিসেম্বর" data-en="December">ডিসেম্বর</option>
+                            </select>
+                        </div>
+                        <div style="display: flex; align-items: flex-end;">
+                            <button type="button" onclick="generateVisitorReport()" class="btn btn-primary btn-full" style="margin-bottom: 1.5rem;" data-bn="প্রতিবেদন দেখুন" data-en="View Report">প্রতিবেদন দেখুন</button>
+                        </div>
+                    </div>
+                    <div id="visitorReportContent"></div>
+                </div>
+            </div>
+
+            <div class="footer">
+                <h3 data-bn="সত্যের কাফেলা ওয়েলফেয়ার সোসাইটি" data-en="Satyér Kafela Welfare Society">সত্যের কাফেলা ওয়েলফেয়ার সোসাইটি</h3>
+                <p data-bn="সিদ্ধিরগঞ্জ, নারায়ণগঞ্জ, বাংলাদেশ" data-en="Siddhirganj, Narayanganj, Bangladesh">সিদ্ধিরগঞ্জ, নারায়ণগঞ্জ, বাংলাদেশ</p>
+                <p style="margin-top: 1rem; font-size: 0.75rem; opacity: 0.6;" data-bn="© ২০২৬ সর্বস্বত্ব সংরক্ষিত" data-en="© 2026 All Rights Reserved">© ২০২৬ সর্বস্বত্ব সংরক্ষিত</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ========== GOOGLE SHEETS CONFIGURATION ==========
+        const GOOGLE_SHEETS_CONFIG = {
+            isActive: true, 
+            sheetId: '1zGNsq0OfflMlxQNfKlWPlUNsbpIYdy_50QtiZI9gl3A', 
+            apiKey: 'AIzaSyAZHdDul8gJVGAQ4M3W5YJSBzKYQyREP4s',
+            ranges: {
+                admins: 'Admin!A2:C',
+                members: 'Members!A2:D'
+            }
+        };
+
+        // ========== DATA STRUCTURE ==========
+        const appData = {
+            language: 'bn',
+            currentUser: null,
+            transactions: JSON.parse(localStorage.getItem('skws_transactions')) || [],
+            members: JSON.parse(localStorage.getItem('skws_members')) || [
+                { id: 1, name: 'রাহিম আহমেদ', designation: 'সভাপতি', monthlyFee: 1500 },
+                { id: 2, name: 'ফাতিমা বেগম', designation: 'সচিব', monthlyFee: 1200 },
+            ],
+            incomeCategories: ['সদস্য ফি', 'দান', 'কর্পোরেট স্পন্সরশিপ', 'অন্যান্য'],
+            incomeCategoriesEn: ['Member Fee', 'Donation', 'Corporate Sponsorship', 'Others'],
+            expenseCategories: ['অফিস ভাড়া', 'বিদ্যুৎ বিল', 'ইন্টারনেট বিল', 'অফিস খরচ', 'প্রোগ্রাম খরচ', 'অন্যান্য'],
+            expenseCategoriesEn: ['Office Rent', 'Electricity Bill', 'WiFi Bill', 'Office Cost', 'Program Cost', 'Others'],
+            admins: JSON.parse(localStorage.getItem('skws_admins')) || [
+                { username: 'admin', password: 'admin123', role: 'cashier' }
+            ]
+        };
+
+        // ========== LANGUAGE SYSTEM ==========
+        function setLanguage(lang) {
+            appData.language = lang;
+            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            updateAllText();
+            if (appData.currentUser && appData.currentUser.role === 'cashier') {
+                updateCategories();
+                loadTransactionsList();
+            }
+        }
+
+        function updateAllText() {
+            document.querySelectorAll('[data-bn]').forEach(el => {
+                const text = appData.language === 'bn' ? el.dataset.bn : el.dataset.en;
+                if (el.tagName === 'OPTION' || el.tagName === 'TEXTAREA') el.textContent = text;
+                else if (el.childNodes.length === 1 && el.childNodes[0].nodeType === 3) el.textContent = text;
+                else if (!el.querySelector('[data-bn]')) el.textContent = text;
+            });
+            const searchInput = document.getElementById('memberSearch');
+            const txnMemberInput = document.getElementById('txnMemberSelect');
+            if(searchInput) searchInput.placeholder = appData.language === 'bn' ? 'নাম দিয়ে খুঁজুন...' : 'Search by name...';
+            if(txnMemberInput) txnMemberInput.placeholder = appData.language === 'bn' ? 'নাম দিয়ে খুঁজুন...' : 'Search by name...';
+        }
+
+        // ========== GOOGLE SHEETS API FETCH ==========
+        async function fetchGoogleSheetsData() {
+            if (!GOOGLE_SHEETS_CONFIG.isActive) return true; 
+            
+            try {
+                const baseUrl = `https://sheets.googleapis.com/v4/spreadsheets/${GOOGLE_SHEETS_CONFIG.sheetId}/values:batchGet?key=${GOOGLE_SHEETS_CONFIG.apiKey}`;
+                const ranges = `ranges=${GOOGLE_SHEETS_CONFIG.ranges.admins}&ranges=${GOOGLE_SHEETS_CONFIG.ranges.members}`;
+                
+                const response = await fetch(`${baseUrl}&${ranges}`);
+                const data = await response.json();
+
+                if (data.error) throw new Error(data.error.message);
+
+                const adminRows = data.valueRanges[0].values || [];
+                appData.admins = adminRows.map(row => ({
+                    username: row[0],
+                    password: row[1],
+                    role: row[2] || 'cashier'
+                }));
+
+                const memberRows = data.valueRanges[1].values || [];
+                appData.members = memberRows.map(row => ({
+                    id: parseInt(row[0]),
+                    name: row[1],
+                    designation: row[2],
+                    monthlyFee: parseFloat(row[3])
+                }));
+
+                return true;
+            } catch (error) {
+                console.error("Google Sheets Error:", error);
+                const errorDiv = document.getElementById('loginErrorMsg');
+                errorDiv.textContent = appData.language === 'bn' ? 'ডেটাবেস সংযোগ ব্যর্থ হয়েছে' : 'Database connection failed';
+                errorDiv.classList.remove('hidden');
+                return false;
+            }
+        }
+
+        // ========== LOGIN & AUTH ==========
+        async function handleLogin(e) {
+            e.preventDefault();
+            
+            const btn = document.getElementById('loginBtn');
+            const btnText = document.getElementById('loginBtnText');
+            const errorDiv = document.getElementById('loginErrorMsg');
+            
+            btnText.innerHTML = '<div class="loader"></div>';
+            btn.disabled = true;
+            errorDiv.classList.add('hidden');
+
+            const sheetsSuccess = await fetchGoogleSheetsData();
+
+            btnText.innerHTML = appData.language === 'bn' ? 'লগইন' : 'Login';
+            btn.disabled = false;
+
+            if (!sheetsSuccess && GOOGLE_SHEETS_CONFIG.isActive) return;
+
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const admin = appData.admins.find(a => a.username === username && a.password === password);
+
+            if (admin) {
+                appData.currentUser = { username, role: admin.role };
+                localStorage.setItem('skws_currentUser', JSON.stringify(appData.currentUser));
+                showDashboard();
+            } else {
+                errorDiv.textContent = appData.language === 'bn' ? 'ভুল ব্যবহারকারী নাম বা পাসওয়ার্ড' : 'Invalid username or password';
+                errorDiv.classList.remove('hidden');
+            }
+
+            document.getElementById('password').value = '';
+        }
+
+        function enterAsVisitor() {
+            appData.currentUser = { username: 'visitor', role: 'visitor' };
+            localStorage.setItem('skws_currentUser', JSON.stringify(appData.currentUser));
+            showDashboard();
+        }
+
+        function logout() {
+            appData.currentUser = null;
+            localStorage.removeItem('skws_currentUser');
+            document.getElementById('loginScreen').classList.remove('hidden');
+            document.getElementById('dashboard').classList.add('hidden');
+            document.getElementById('cashierPanel').classList.add('hidden');
+            document.getElementById('visitorPanel').classList.add('hidden');
+        }
+
+        function showDashboard() {
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('dashboard').classList.remove('hidden');
+
+            if (appData.currentUser.role === 'visitor') {
+                document.getElementById('cashierPanel').classList.add('hidden');
+                document.getElementById('visitorPanel').classList.remove('hidden');
+                document.getElementById('userRole').textContent = appData.language === 'bn' ? '👥 অতিথি ব্যবহারকারী' : '👥 Visitor';
+            } else {
+                document.getElementById('cashierPanel').classList.remove('hidden');
+                document.getElementById('visitorPanel').classList.add('hidden');
+                document.getElementById('userRole').textContent = appData.language === 'bn' ? '💼 সম্পাদক' : '💼 Cashier';
+                loadTransactionsList();
+                loadMembersList(); 
+                setDateToToday();
+                updateCategories();
+                
+                document.getElementById('txnCategory').addEventListener('change', checkMemberFeeCategory);
+            }
+        }
+
+        // ========== TRANSACTIONS ==========
+        function updateCategories() {
+            const type = document.getElementById('txnType').value;
+            const select = document.getElementById('txnCategory');
+            const categories = type === 'income' ? (appData.language === 'bn' ? appData.incomeCategories : appData.incomeCategoriesEn) : (appData.language === 'bn' ? appData.expenseCategories : appData.expenseCategoriesEn);
+
+            select.innerHTML = categories.map(cat => `<option value="${cat}">${cat}</option>`).join('');
+            checkMemberFeeCategory();
+        }
+
+        function checkMemberFeeCategory() {
+            const category = document.getElementById('txnCategory').value;
+            const memberGroup = document.getElementById('txnMemberSelectGroup');
+            const memberInput = document.getElementById('txnMemberSelect');
+            
+            if (category === 'সদস্য ফি' || category === 'Member Fee') {
+                memberGroup.classList.remove('hidden');
+                memberInput.required = true;
+            } else {
+                memberGroup.classList.add('hidden');
+                memberInput.required = false;
+                memberInput.value = '';
+            }
+        }
+
+        function handleAddTransaction(e) {
+            e.preventDefault();
+            
+            const category = document.getElementById('txnCategory').value;
+            let description = document.getElementById('txnDescription').value;
+
+            if (category === 'সদস্য ফি' || category === 'Member Fee') {
+                const memberVal = document.getElementById('txnMemberSelect').value;
+                if (!memberVal) {
+                    alert(appData.language === 'bn' ? 'দয়া করে একজন সদস্য নির্বাচন করুন' : 'Please select a member');
+                    return;
+                }
+                const parsedId = memberVal.split(' - ')[0];
+                description = `${description} (ID: ${parsedId})`;
+            }
+
+            const txn = {
+                id: Date.now(),
+                date: document.getElementById('txnDate').value,
+                type: document.getElementById('txnType').value,
+                category: category,
+                description: description,
+                amount: parseFloat(document.getElementById('txnAmount').value),
+                enteredBy: appData.currentUser.username,
+                editHistory: []
+            };
+
+            appData.transactions.push(txn);
+            localStorage.setItem('skws_transactions', JSON.stringify(appData.transactions));
+
+            alert(appData.language === 'bn' ? '✓ লেনদেন যোগ হয়েছে' : '✓ Transaction added');
+            e.target.reset();
+            setDateToToday();
+            updateCategories();
+            loadTransactionsList();
+        }
+
+        function loadTransactionsList() {
+            const tbody = document.querySelector('#transactionsList tbody');
+            tbody.innerHTML = '';
+
+            if (appData.transactions.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 2rem; color: var(--text-secondary);">${appData.language === 'bn' ? 'কোন লেনদেন নেই' : 'No transactions found'}</td></tr>`;
+                return;
+            }
+
+            appData.transactions.sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 20).forEach(txn => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${txn.date}</td>
+                    <td>${txn.type === 'income' ? (appData.language === 'bn' ? '📈 আয়' : '📈 Income') : (appData.language === 'bn' ? '📉 ব্যয়' : '📉 Expense')}</td>
+                    <td>${txn.category}</td>
+                    <td>${txn.description}</td>
+                    <td style="font-weight: 600; color: ${txn.type === 'income' ? 'var(--success)' : 'var(--danger)'};">${(txn.type === 'income' ? '+' : '-')} ${txn.amount.toLocaleString('bn-BD')} ৳</td>
+                    <td>
+                        <button type="button" class="btn btn-sm btn-danger" onclick="deleteTransaction(${txn.id})">
+                            ${appData.language === 'bn' ? '🗑️ মুছুন' : '🗑️ Delete'}
+                        </button>
+                    </td>
+                `;
+            });
+        }
+
+        function deleteTransaction(id) {
+            if (confirm(appData.language === 'bn' ? 'আপনি কি নিশ্চিত?' : 'Are you sure?')) {
+                appData.transactions = appData.transactions.filter(t => t.id !== id);
+                localStorage.setItem('skws_transactions', JSON.stringify(appData.transactions));
+                loadTransactionsList();
+            }
+        }
+
+        // ========== MEMBERS ==========
+        function loadMembersList() {
+            const memberTrackerDatalist = document.getElementById('memberDatalist');
+            const txnFormDatalist = document.getElementById('txnMemberDatalist');
+            
+            memberTrackerDatalist.innerHTML = '';
+            txnFormDatalist.innerHTML = '';
+            
+            appData.members.forEach(member => {
+                // ADDED DESIGNATION TO STRING
+                const optionString = `${member.id} - ${member.name} (${member.designation})`;
+                
+                const option1 = document.createElement('option');
+                option1.value = optionString;
+                memberTrackerDatalist.appendChild(option1);
+
+                const option2 = document.createElement('option');
+                option2.value = optionString;
+                txnFormDatalist.appendChild(option2);
+            });
+        }
+
+        function handleMemberSelect(inputValue) {
+            const container = document.getElementById('singleMemberView');
+            if (!inputValue.trim()) {
+                container.classList.add('hidden');
+                return;
+            }
+
+            // ROBUST PARSING: Extracts ID directly from the start of string
+            const memberId = parseInt(inputValue.split(' - ')[0]);
+            const member = appData.members.find(m => m.id === memberId);
+            
+            if (!member) {
+                container.classList.add('hidden');
+                return;
+            }
+
+            container.classList.remove('hidden');
+            container.innerHTML = `
+                <div class="card" style="box-shadow: none; border: 2px solid var(--primary); padding: 1.5rem; margin-bottom: 0;">
+                    <h3 style="color: var(--primary); margin-bottom: 0.25rem;">${member.name}</h3>
+                    <p><small style="color: var(--text-secondary);">${member.designation}</small></p>
+                    <p style="margin-top: 1rem; font-weight: 500;">💰 ${appData.language === 'bn' ? 'মাসিক ফি' : 'Monthly Fee'}: ${member.monthlyFee.toLocaleString('bn-BD')} ৳</p>
+                    <div class="fee-grid" id="fees-${member.id}"></div>
+                </div>
+            `;
+            loadMemberFees(member.id);
+        }
+
+        function loadMemberFees(memberId) {
+            const container = document.getElementById(`fees-${memberId}`);
+            if (!container) return;
+            container.innerHTML = '';
+
+            const months = ['জানু', 'ফেব', 'মার্চ', 'এপ্রি', 'মে', 'জুন', 'জুলা', 'আগ', 'সেপ', 'অক্টো', 'নভে', 'ডিসে'];
+            for (let m = 1; m <= 12; m++) {
+                const paid = appData.transactions.some(t => 
+                    t.type === 'income' && 
+                    (t.category === 'সদস্য ফি' || t.category === 'Member Fee') && 
+                    t.date.startsWith(new Date().getFullYear() + '-' + String(m).padStart(2, '0')) &&
+                    t.description.includes(`ID: ${memberId}`)
+                );
+
+                const btn = document.createElement('button');
+                btn.className = `fee-month ${paid ? 'paid' : 'unpaid'}`;
+                btn.innerHTML = `<strong>${months[m-1]}</strong><small>${paid ? '✓' : '✗'}</small>`;
+                btn.onclick = () => recordMemberFee(memberId, m, appData.members.find(mb => mb.id === memberId));
+                container.appendChild(btn);
+            }
+        }
+
+        function recordMemberFee(memberId, month, member) {
+            const year = new Date().getFullYear();
+            const monthStr = String(month).padStart(2, '0');
+            const exists = appData.transactions.some(t => 
+                t.type === 'income' && 
+                t.date === `${year}-${monthStr}-01` &&
+                t.description.includes(`ID: ${memberId}`)
+            );
+
+            if (exists) {
+                alert(appData.language === 'bn' ? 'ইতিমধ্যে রেকর্ড করা হয়েছে' : 'Already recorded');
+                return;
+            }
+
+            const txn = {
+                id: Date.now(),
+                date: `${year}-${monthStr}-01`,
+                type: 'income',
+                category: appData.language === 'bn' ? 'সদস্য ফি' : 'Member Fee',
+                description: `${member.name} - ${member.designation} (ID: ${memberId})`,
+                amount: member.monthlyFee,
+                enteredBy: appData.currentUser.username,
+                editHistory: []
+            };
+
+            appData.transactions.push(txn);
+            localStorage.setItem('skws_transactions', JSON.stringify(appData.transactions));
+            loadMemberFees(memberId);
+            loadTransactionsList();
+        }
+
+        // ========== REPORTS ==========
+        function generateReport() {
+            const year = parseInt(document.getElementById('reportYear').value);
+            const month = document.getElementById('reportMonth').value;
+
+            const filtered = appData.transactions.filter(t => {
+                const tYear = parseInt(t.date.split('-')[0]);
+                const tMonth = t.date.split('-')[1];
+                return tYear === year && (month === 'all' || tMonth === String(month).padStart(2, '0'));
+            });
+
+            const incomeByCategory = {};
+            const expenseByCategory = {};
+
+            filtered.filter(t => t.type === 'income').forEach(t => incomeByCategory[t.category] = (incomeByCategory[t.category] || 0) + t.amount);
+            filtered.filter(t => t.type === 'expense').forEach(t => expenseByCategory[t.category] = (expenseByCategory[t.category] || 0) + t.amount);
+
+            const totalIncome = Object.values(incomeByCategory).reduce((a, b) => a + b, 0);
+            const totalExpense = Object.values(expenseByCategory).reduce((a, b) => a + b, 0);
+            const balance = totalIncome - totalExpense;
+
+            document.getElementById('reportContent').innerHTML = `
+                <div class="stats-grid">
+                    <div class="stat-card" style="border-bottom: 4px solid var(--success);">
+                        <div class="stat-value" style="color: var(--success);">${totalIncome.toLocaleString('bn-BD')} ৳</div>
+                        <div class="stat-label">${appData.language === 'bn' ? 'মোট আয়' : 'Total Income'}</div>
+                    </div>
+                    <div class="stat-card" style="border-bottom: 4px solid var(--danger);">
+                        <div class="stat-value" style="color: var(--danger);">${totalExpense.toLocaleString('bn-BD')} ৳</div>
+                        <div class="stat-label">${appData.language === 'bn' ? 'মোট ব্যয়' : 'Total Expense'}</div>
+                    </div>
+                    <div class="stat-card" style="border-bottom: 4px solid var(--primary);">
+                        <div class="stat-value" style="color: var(--primary);">${balance.toLocaleString('bn-BD')} ৳</div>
+                        <div class="stat-label">${appData.language === 'bn' ? 'বর্তমান ব্যালেন্স' : 'Current Balance'}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function generateVisitorReport() {
+            generateReport();
+            document.getElementById('visitorReportContent').innerHTML = document.getElementById('reportContent').innerHTML;
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function setDateToToday() {
+            const dateInput = document.getElementById('txnDate');
+            if (dateInput && !dateInput.value) {
+                dateInput.value = new Date().toISOString().split('T')[0];
+            }
+        }
+
+        window.addEventListener('load', () => {
+            const stored = localStorage.getItem('skws_currentUser');
+            if (stored) {
+                appData.currentUser = JSON.parse(stored);
+                showDashboard();
+            }
+            updateAllText();
+        });
+    </script>
+</body>
+</html>
