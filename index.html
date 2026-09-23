@@ -1019,9 +1019,9 @@
         }
 
         // ========== REPORTS ==========
-        function generateReport() {
-            const year = parseInt(document.getElementById('reportYear').value);
-            const month = document.getElementById('reportMonth').value;
+        function buildReportHTML(yearId, monthId, outputId) {
+            const year = parseInt(document.getElementById(yearId).value);
+            const month = document.getElementById(monthId).value;
 
             const filtered = appData.transactions.filter(t => {
                 const tYear = parseInt(t.date.split('-')[0]);
@@ -1039,7 +1039,7 @@
             const totalExpense = Object.values(expenseByCategory).reduce((a, b) => a + b, 0);
             const balance = totalIncome - totalExpense;
 
-            document.getElementById('reportContent').innerHTML = `
+            document.getElementById(outputId).innerHTML = `
                 <div class="stats-grid">
                     <div class="stat-card" style="border-bottom: 4px solid var(--success);">
                         <div class="stat-value" style="color: var(--success);">${totalIncome.toLocaleString('bn-BD')} ৳</div>
@@ -1054,12 +1054,63 @@
                         <div class="stat-label">${appData.language === 'bn' ? 'বর্তমান ব্যালেন্স' : 'Current Balance'}</div>
                     </div>
                 </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+                    <div class="card" style="margin-bottom: 0;">
+                        <div class="card-title">${appData.language === 'bn' ? 'আয়ের বিস্তারিত' : 'Income Breakdown'}</div>
+                        <div class="table-wrapper">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>${appData.language === 'bn' ? 'বিভাগ' : 'Category'}</th>
+                                        <th>${appData.language === 'bn' ? 'পরিমাণ' : 'Amount'}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${Object.entries(incomeByCategory).map(([cat, amt]) => `
+                                        <tr>
+                                            <td><strong>${cat}</strong></td>
+                                            <td style="color: var(--success); font-weight: 600;">+ ${amt.toLocaleString('bn-BD')} ৳</td>
+                                        </tr>
+                                    `).join('')}
+                                    ${Object.keys(incomeByCategory).length === 0 ? `<tr><td colspan="2" style="text-align: center; color: var(--text-secondary);">${appData.language === 'bn' ? 'কোন তথ্য নেই' : 'No data'}</td></tr>` : ''}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="card" style="margin-bottom: 0;">
+                        <div class="card-title">${appData.language === 'bn' ? 'ব্যয়ের বিস্তারিত' : 'Expense Breakdown'}</div>
+                        <div class="table-wrapper">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>${appData.language === 'bn' ? 'বিভাগ' : 'Category'}</th>
+                                        <th>${appData.language === 'bn' ? 'পরিমাণ' : 'Amount'}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${Object.entries(expenseByCategory).map(([cat, amt]) => `
+                                        <tr>
+                                            <td><strong>${cat}</strong></td>
+                                            <td style="color: var(--danger); font-weight: 600;">- ${amt.toLocaleString('bn-BD')} ৳</td>
+                                        </tr>
+                                    `).join('')}
+                                    ${Object.keys(expenseByCategory).length === 0 ? `<tr><td colspan="2" style="text-align: center; color: var(--text-secondary);">${appData.language === 'bn' ? 'কোন তথ্য নেই' : 'No data'}</td></tr>` : ''}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             `;
         }
 
+        function generateReport() {
+            buildReportHTML('reportYear', 'reportMonth', 'reportContent');
+        }
+
         function generateVisitorReport() {
-            generateReport();
-            document.getElementById('visitorReportContent').innerHTML = document.getElementById('reportContent').innerHTML;
+            buildReportHTML('visitorYear', 'visitorMonth', 'visitorReportContent');
         }
 
         function switchTab(tabName) {
